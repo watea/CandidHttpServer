@@ -1,9 +1,21 @@
 [versions]
 agp = "8.6.1"
+androidGradle = "7.4.2"
+androidGradleVersion = "8.1.4"
 annotation = "1.9.1"
+annotationVersion = "1.5.0"
+comAndroidToolsBuildGradle = "8.6.1"
+gradle = "8.0.2"
+gradleVersion = "8.0.0"
 
 [libraries]
 annotation = { module = "androidx.annotation:annotation", version.ref = "annotation" }
+annotation-v150 = { module = "androidx.annotation:annotation", version.ref = "annotationVersion" }
+gradle = { module = "com.android.tools.build:gradle", version.ref = "gradle" }
+gradle-v742 = { module = "com.android.tools.build:gradle", version.ref = "androidGradle" }
+gradle-v800 = { module = "com.android.tools.build:gradle", version.ref = "gradleVersion" }
+gradle-v814 = { module = "com.android.tools.build:gradle", version.ref = "androidGradleVersion" }
+gradle-v861 = { module = "com.android.tools.build:gradle", version.ref = "comAndroidToolsBuildGradle" }
 
 [plugins]
 android-library = { id = "com.android.library", version.ref = "agp" }

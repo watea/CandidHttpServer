@@ -1,16 +1,18 @@
+
 # CandidHttpServer
 
-**CandidHttpServer** is a lightweight and easy-to-use library for setting up a minimalist HTTP server on Android. It’s ideal for applications that require a local HTTP server, such as sharing media or data over a local network.
+**CandidHttpServer** is a lightweight and easy-to-use library for setting up a minimalist HTTP server on Android. It is ideal for applications requiring a local HTTP server, such as media or data sharing over a local network.
+
 
 ## Installation
 
 ### Using GitHub Packages
 
-To use this library in your project from GitHub Packages, add the following to your `build.gradle.kts` file. Replace `TAG` with the version tag of the release you want to use.
+To use this library in your project from GitHub Packages, add the following lines to your `build.gradle` file. Replace `TAG` with the version tag of the release you want to use.
 
-1. Add the GitHub Packages repository to your project’s repositories, referencing your GitHub token from an environment variable (e.g., `GITHUB_TOKEN`).
+1. Add the GitHub Packages repository to your project’s repositories by referencing your GitHub token from an environment variable (e.g., `GITHUB_TOKEN`).
 
-```kotlin
+```groovy
 repositories {
     maven {
         url = uri("https://maven.pkg.github.com/YOUR_USERNAME/YOUR_REPOSITORY")
@@ -24,41 +26,46 @@ repositories {
 
 2. Add the dependency.
 
-```kotlin
+```groovy
 dependencies {
-    implementation("com.watea.CandidHttpServer:CandidHttpServer:TAG")
+    implementation 'com.watea.CandidHttpServer:CandidHttpServer:TAG'
 }
 ```
 
-> **Note:** Replace `YOUR_USERNAME` and `YOUR_REPOSITORY` with your GitHub username and repository name. Ensure that the `GITHUB_TOKEN` environment variable is set on your system with `read:packages` permissions.
+> **Note:** Replace `YOUR_USERNAME` and `YOUR_REPOSITORY` with your GitHub username and the repository name. Ensure that the `GITHUB_TOKEN` environment variable is set on your system with `read:packages` permissions.
 
 ### Using JitPack
 
-You can also include this library using [JitPack](https://jitpack.io/).
+Alternatively, you can include this library using [JitPack](https://jitpack.io/).
 
-1. Add the JitPack repository to your project’s repositories:
+1. Add the JitPack repository to your top-level `settings.gradle` file:
 
-```kotlin
-repositories {
-    maven { url = uri("https://jitpack.io") }
+```groovy
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        maven { url 'https://jitpack.io' }
+    }
 }
 ```
 
-2. Add the dependency using the JitPack format:
+2. Add the dependency in your module’s `build.gradle` file:
 
-```kotlin
+```groovy
 dependencies {
-    implementation("com.github.watea:CandidHttpServer:latest.release")
+    implementation 'com.github.watea:CandidHttpServer:latest.release'
 }
 ```
 
 ## Usage
 
-### Setting Up `HttpServer`
+### Configuring the `HttpServer`
 
 The library provides an `HttpServer` class that can be instantiated and started on a local port to listen for incoming connections.
 
-### Example: Server Setup
+### Example: Setting up the Server
 
 ```java
 import com.watea.CandidHttpServer.HttpServer;
@@ -87,14 +94,13 @@ public class MyHttpServer {
 }
 ```
 
-### Creating a `Handler`
+### Creating a Custom `Handler`
 
-Create a custom `Handler` by implementing the `HttpServer.Handler` interface. Below is an example of an image resource handler, `ResourceHandler`:
+Create a custom `Handler` by implementing the `HttpServer.Handler` interface. Here’s an example of a resource handler, `ResourceHandler`:
 
 ```java
 import com.watea.CandidHttpServer.HttpServer;
 import android.graphics.Bitmap;
-import android.util.Log;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -105,7 +111,8 @@ public class ResourceHandler implements HttpServer.Handler {
 
     public String createLogoFile(Bitmap image, int id) {
         bitmap = Bitmap.createScaledBitmap(image, 300, 300, true);
-        return uri = "logo" + id + ".jpg";
+        uri = "logo" + id + ".jpg";
+        return uri;
     }
 
     @Override
@@ -137,7 +144,7 @@ httpServer.startServer();
 
 ### Complete Example
 
-A more complete example of using **CandidHttpServer** in a real application can be found in the **[RadioUpnp project](https://github.com/watea/RadioUpnp)**. This project demonstrates how to integrate and extend the library in a full Android application.
+A more complete example of using **CandidHttpServer** in a real-world application can be found in the project **[RadioUpnp](https://github.com/watea/RadioUpnp)**. This project demonstrates how to integrate and extend the library.
 
 ## Discussion
 

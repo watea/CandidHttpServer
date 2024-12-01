@@ -38,3 +38,13 @@ android {
 dependencies {
     implementation(libs.annotation)
 }
+
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                from components.release
+            }
+        }
+    }
+}

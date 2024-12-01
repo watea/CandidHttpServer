@@ -28,7 +28,7 @@ repositories {
 
 ```groovy
 dependencies {
-    implementation 'com.watea.CandidHttpServer:CandidHttpServer:TAG'
+    implementation 'com.watea.CandidHttpServer:CandidHttpServer:RELEASE_TAG'
 }
 ```
 
@@ -55,7 +55,7 @@ dependencyResolutionManagement {
 
 ```groovy
 dependencies {
-    implementation 'com.github.watea:CandidHttpServer:latest.release'
+    implementation 'com.github.watea:CandidHttpServer:RELEASE_TAG'
 }
 ```
 
@@ -93,6 +93,8 @@ public class MyHttpServer {
     }
 }
 ```
+
+Note: you may also decide to set the driver artifacts in constructor, it is matter of design. 
 
 ### Creating a Custom `Handler`
 

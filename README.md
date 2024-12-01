@@ -1,7 +1,7 @@
 
 # CandidHttpServer
 
-**CandidHttpServer** is a lightweight and easy-to-use library for setting up a minimalist HTTP server on Android. It is ideal for applications requiring a local HTTP server, such as media or data sharing over a local network.
+**CandidHttpServer** is a -one file- lightweight and easy-to-use library for setting up a minimalist HTTP server on Android. It is ideal for applications requiring a local HTTP server, such as media or data sharing over a local network.
 
 
 ## Installation
@@ -149,6 +149,8 @@ httpServer.startServer();
 A more complete example of using **CandidHttpServer** in a real-world application can be found in the project **[RadioUpnp](https://github.com/watea/RadioUpnp)**. This project demonstrates how to integrate and extend the library.
 
 ## Discussion
+
+The .gradle integration has been foreseen to work seamlessly in Android environment. But you may use the library in any other projects.
 
 **CandidHttpServer** is designed for simplicity and minimal footprint, making it suitable for basic use cases and small-scale applications on Android. However, it may not be ideal for more complex use cases, such as handling extensive concurrent connections or advanced HTTP features (e.g., HTTPS, complex request routing, or advanced error handling).
 

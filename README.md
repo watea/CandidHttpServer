@@ -28,7 +28,7 @@ repositories {
 
 ```groovy
 dependencies {
-    implementation 'com.watea.CandidHttpServer:CandidHttpServer:RELEASE_TAG'
+    implementation 'com.watea.candidhttpserver:TAG'
 }
 ```
 
@@ -55,7 +55,7 @@ dependencyResolutionManagement {
 
 ```groovy
 dependencies {
-    implementation 'com.github.watea:CandidHttpServer:RELEASE_TAG'
+    implementation 'com.github.watea:candidhttpserver:TAG'
 }
 ```
 
@@ -68,7 +68,7 @@ The library provides an `HttpServer` class that can be instantiated and started 
 ### Example: Setting up the Server
 
 ```java
-import com.watea.CandidHttpServer.HttpServer;
+import com.watea.candidhttpserver.HttpServer;
 import java.io.IOException;
 
 public class MyHttpServer {
@@ -101,7 +101,7 @@ Note: you may also decide to set the driver artifacts in constructor, it is matt
 Create a custom `Handler` by implementing the `HttpServer.Handler` interface. Here’s an example of a resource handler, `ResourceHandler`:
 
 ```java
-import com.watea.CandidHttpServer.HttpServer;
+import com.watea.candidhttpserver.HttpServer;
 import android.graphics.Bitmap;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

@@ -150,7 +150,7 @@ A more complete example of using **CandidHttpServer** in a real-world applicatio
 
 ## Discussion
 
-The used primitives and .gradle integration has been foreseen to work seamlessly in Android environment. But you may use the library in any other projects.
+The used primitives and .gradle integration have been foreseen to work seamlessly in Android environment. But you may adapt and use the library in any other projects.
 
 **CandidHttpServer** is designed for simplicity and minimal footprint, making it suitable for basic use cases and small-scale applications on Android. However, it may not be ideal for more complex use cases, such as handling extensive concurrent connections or advanced HTTP features (e.g., HTTPS, complex request routing, or advanced error handling).
 

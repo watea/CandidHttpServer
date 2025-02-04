@@ -69,6 +69,7 @@ public class HttpServer {
   }
 
   public void start() {
+    Log.d(LOG_TAG, "start");
     isRunning = true;
     new Thread(() -> {
       while (isRunning) {
@@ -83,14 +84,19 @@ public class HttpServer {
             }
           }).start();
         } catch (IOException iOException) {
-          Log.e(LOG_TAG, "HttpServer failed to create socket received!", iOException);
+          if (isRunning) {
+            Log.e(LOG_TAG, "HttpServer failed to create socket received!", iOException);
+          }
         }
       }
+      Log.d(LOG_TAG, "exit");
     }).start();
   }
 
-  public void stop() {
+  public void stop() throws IOException {
+    Log.d(LOG_TAG, "stop");
     isRunning = false;
+    serverSocket.close();
   }
 
   public int getListeningPort() {

@@ -89,7 +89,7 @@ public class HttpServer {
           }
         }
       }
-      Log.d(LOG_TAG, "exit");
+      Log.d(LOG_TAG, "start: server stopped");
     }).start();
   }
 

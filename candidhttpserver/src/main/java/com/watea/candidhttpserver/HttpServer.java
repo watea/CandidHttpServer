@@ -144,7 +144,7 @@ public class HttpServer {
     // Parse the headers
     String line;
     while (!(line = reader.readLine()).isEmpty()) {
-      String[] headerParts = line.split(SEPARATOR, 2);
+      final String[] headerParts = line.split(SEPARATOR, 2);
       if (headerParts.length == 2) {
         request.addHeader(headerParts[0], headerParts[1]);
       }

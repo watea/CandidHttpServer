@@ -4,21 +4,23 @@ plugins {
 }
 
 android {
-    namespace 'com.watea.candidhttpserver'
-    compileSdk 36
+    namespace = 'com.watea.candidhttpserver'
+    compileSdk = 36
 
     defaultConfig {
         aarMetadata {
             minCompileSdk = 26
         }
-        minSdk 26
-        consumerProguardFiles "consumer-rules.pro"
+        minSdk = 26
+        consumerProguardFiles("consumer-rules.pro")
     }
 
     buildTypes {
         release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            minifyEnabled = false
+            proguardFiles(
+                    getDefaultProguardFile('proguard-android-optimize.txt'),
+                    'proguard-rules.pro')
         }
     }
 
@@ -30,8 +32,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
 }
 
@@ -42,8 +44,8 @@ dependencies {
 afterEvaluate {
     publishing {
         publications {
-            release(MavenPublication) {
-                from components.release
+            create("release", MavenPublication) {
+                from components["release"]
             }
         }
     }

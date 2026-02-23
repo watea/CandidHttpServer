@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace 'com.watea.candidhttpserver'
-    compileSdk 34
+    compileSdk 36
 
     defaultConfig {
         aarMetadata {

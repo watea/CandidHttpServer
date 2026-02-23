@@ -222,12 +222,12 @@ public class HttpServer {
     }
 
     public void send() throws IOException {
+      isClientHandled = true;
       outputStream.write(OK.getBytes(StandardCharsets.UTF_8));
       for (final String key : headers.keySet()) {
         outputStream.write(getBytes(key + SEPARATOR + headers.get(key) + END));
       }
       outputStream.write(getBytes(END));
-      isClientHandled = true;
     }
 
     public boolean isClientHandled() {

@@ -144,10 +144,6 @@ MyHttpServer httpServer = new MyHttpServer();
 httpServer.startServer();
 ```
 
-### Complete Example
-
-A more complete example of using **CandidHttpServer** in a real-world application can be found in the project **[RadioUpnp](https://github.com/watea/RadioUpnp)**. This project demonstrates how to integrate and extend the library.
-
 ## Discussion
 
 The used primitives and .gradle integration have been foreseen to work seamlessly in Android environment. But you may adapt and use the library in any other projects.

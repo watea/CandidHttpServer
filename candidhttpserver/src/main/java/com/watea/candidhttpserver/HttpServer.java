@@ -36,24 +36,32 @@ import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @SuppressWarnings("unused")
 public class HttpServer {
   private static final String LOG_TAG = HttpServer.class.getSimpleName();
   private static final String END = "\r\n";
   private static final String HTTP = "HTTP/1.1 ";
-  private static final String OK = HTTP + "200 OK" + END;
   private static final String NOT_FOUND = HTTP + "404 Not Found" + END + END;
-  private static final String BAD_REQUEST = HTTP + "Bad Request" + END + END;
+  private static final String BAD_REQUEST = HTTP + "400 Bad Request" + END + END;
   private static final String SEPARATOR = ": ";
+  // Timeout applied to each accepted client socket to prevent slow/stalled
+  // connections from holding a thread indefinitely
+  private static final int CLIENT_READ_TIMEOUT_MS = 5000;
   @NonNull
   private final ServerSocket serverSocket;
-  private final Set<Handler> handlers = new HashSet<>();
-  private boolean isRunning = false;
+  // List preserves insertion order, ensuring handlers are tried in registration order
+  private final List<Handler> handlers = new ArrayList<>();
+  // Bounded thread pool: avoids unbounded thread creation under concurrent connections
+  private final ExecutorService executor = Executors.newCachedThreadPool();
+  // volatile: written by stop() (caller thread) and read by the server accept-loop thread
+  private volatile boolean isRunning = false;
 
   public HttpServer() throws IOException {
     serverSocket = new ServerSocket(0);
@@ -75,17 +83,22 @@ public class HttpServer {
       while (isRunning) {
         try {
           final Socket socket = serverSocket.accept();
-          new Thread(() -> {
-            handleClient(socket);
+          // Delegate client handling to the thread pool instead of spawning a raw thread
+          executor.submit(() -> {
             try {
-              socket.close();
-            } catch (IOException iOException) {
-              Log.e(LOG_TAG, "HttpServer failed to close socket received!", iOException);
+              handleClient(socket);
+            } finally {
+              // Always close the socket, even if handleClient throws
+              try {
+                socket.close();
+              } catch (IOException iOException) {
+                Log.e(LOG_TAG, "start: failed to close client socket", iOException);
+              }
             }
-          }).start();
+          });
         } catch (IOException iOException) {
           if (isRunning) {
-            Log.e(LOG_TAG, "HttpServer failed to create socket received!", iOException);
+            Log.e(LOG_TAG, "start: failed to accept connection", iOException);
           }
         }
       }
@@ -96,6 +109,8 @@ public class HttpServer {
   public void stop() throws IOException {
     Log.d(LOG_TAG, "stop");
     isRunning = false;
+    // Interrupt all in-flight handler threads.
+    executor.shutdownNow();
     serverSocket.close();
   }
 
@@ -104,6 +119,13 @@ public class HttpServer {
   }
 
   private void handleClient(@NonNull Socket socket) {
+    try {
+      // Guard against slow or stalled clients blocking a thread forever
+      socket.setSoTimeout(CLIENT_READ_TIMEOUT_MS);
+    } catch (IOException iOException) {
+      Log.e(LOG_TAG, "handleClient: failed to set socket timeout", iOException);
+      return;
+    }
     try (final BufferedReader reader =
            new BufferedReader(new InputStreamReader(socket.getInputStream()));
          final OutputStream responseStream = socket.getOutputStream()) {
@@ -115,6 +137,7 @@ public class HttpServer {
         final Response response = new Response(responseStream);
         for (final Handler handler : handlers) {
           handler.handle(request, response, responseStream);
+          // Stop at first handler that sent a response
           if (response.isClientHandled()) {
             break;
           }
@@ -125,7 +148,7 @@ public class HttpServer {
       }
       responseStream.flush();
     } catch (IOException iOException) {
-      Log.e(LOG_TAG, "handleClient: failed!", iOException);
+      Log.e(LOG_TAG, "handleClient: failed", iOException);
     }
   }
 
@@ -141,9 +164,10 @@ public class HttpServer {
       return null;
     }
     final Request request = new Request(requestParts[0], requestParts[1], requestParts[2]);
-    // Parse the headers
+    // Parse headers until the blank line that separates headers from body.
+    // readLine() can return null if the connection is closed mid-request.
     String line;
-    while (!(line = reader.readLine()).isEmpty()) {
+    while (((line = reader.readLine()) != null) && !line.isEmpty()) {
       final String[] headerParts = line.split(SEPARATOR, 2);
       if (headerParts.length == 2) {
         request.addHeader(headerParts[0], headerParts[1]);
@@ -153,10 +177,10 @@ public class HttpServer {
   }
 
   public interface Handler {
-    void handle
-      (@NonNull Request request,
-       @NonNull Response response,
-       @NonNull OutputStream responseStream) throws IOException;
+    void handle(
+      @NonNull Request request,
+      @NonNull Response response,
+      @NonNull OutputStream responseStream) throws IOException;
   }
 
   public static class Request {
@@ -212,6 +236,10 @@ public class HttpServer {
     @NonNull
     private final OutputStream outputStream;
     private boolean isClientHandled = false;
+    // HTTP status sent by send(); defaults to 200 OK.
+    private int statusCode = 200;
+    @NonNull
+    private String statusMessage = "OK";
 
     public Response(@NonNull OutputStream outputStream) {
       this.outputStream = outputStream;
@@ -221,11 +249,18 @@ public class HttpServer {
       headers.put(key, value);
     }
 
+    // Overrides the default 200 OK status.
+    // Must be called before send.
+    public void setStatus(int code, @NonNull String message) {
+      this.statusCode = code;
+      this.statusMessage = message;
+    }
+
     public void send() throws IOException {
       isClientHandled = true;
-      outputStream.write(OK.getBytes(StandardCharsets.UTF_8));
-      for (final String key : headers.keySet()) {
-        outputStream.write(getBytes(key + SEPARATOR + headers.get(key) + END));
+      outputStream.write(getBytes("HTTP/1.1 " + statusCode + " " + statusMessage + END));
+      for (final Map.Entry<String, String> entry : headers.entrySet()) {
+        outputStream.write(getBytes(entry.getKey() + SEPARATOR + entry.getValue() + END));
       }
       outputStream.write(getBytes(END));
     }

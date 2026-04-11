@@ -187,14 +187,17 @@ public class HttpServer {
     @NonNull
     private final String method;
     @NonNull
+    private final String rawPath;
+    @NonNull
     private final Uri uri;
     @NonNull
     private final String protocol;
     private final Map<String, String> headers = new HashMap<>();
 
-    public Request(@NonNull String method, @NonNull String path, @NonNull String protocol) {
+    public Request(@NonNull String method, @NonNull String rawPath, @NonNull String protocol) {
       this.method = method;
-      uri = Uri.parse(path);
+      this.rawPath = rawPath;
+      uri = Uri.parse(this.rawPath);
       this.protocol = protocol;
     }
 
@@ -224,8 +227,13 @@ public class HttpServer {
     }
 
     @Nullable
-    public String getParams(@NonNull String key) {
+    public String getParam(@NonNull String key) {
       return uri.getQueryParameter(key);
+    }
+
+    @NonNull
+    public String getRawPath() {
+      return rawPath;
     }
   }
 

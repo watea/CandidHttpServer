@@ -12,7 +12,7 @@ android {
             minCompileSdk = 26
         }
         minSdk = 26
-        consumerProguardFiles("consumer-rules.pro")
+        consumerProguardFiles('consumer-rules.pro')
     }
 
     buildTypes {
@@ -25,7 +25,7 @@ android {
     }
 
     publishing {
-        singleVariant("release") {
+        singleVariant('release') {
             withSourcesJar()
             withJavadocJar()
         }
@@ -38,14 +38,14 @@ android {
 }
 
 dependencies {
-    implementation 'androidx.annotation:annotation:1.9.1'
+    implementation 'androidx.annotation:annotation:1.10.0'
 }
 
 afterEvaluate {
     publishing {
         publications {
-            create("release", MavenPublication) {
-                from components["release"]
+            create('release', MavenPublication) {
+                from components['release']
             }
         }
     }

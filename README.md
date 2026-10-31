@@ -88,13 +88,21 @@ public class MyHttpServer {
 
     public void stopServer() {
         if (server != null) {
-            server.stop();
+            try {
+                server.stop();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 }
 ```
 
-Note: you may also decide to set the driver artifacts in constructor, it is matter of design. 
+Note: handlers may also be registered in your own class constructor; it is a matter of design. Handlers can be added at any time, even while the server is running.
+
+A specific port can be requested with `new HttpServer(port)`. `HttpServer` implements `Closeable`, so it can be used in a try-with-resources block.
+
+An instance is single-use: once `stop()` has been called, `start()` throws `IllegalStateException`; create a new instance to restart. 
 
 ### Creating a Custom `Handler`
 
@@ -105,7 +113,6 @@ import com.watea.candidhttpserver.HttpServer;
 import android.graphics.Bitmap;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 
 public class ResourceHandler implements HttpServer.Handler {
     private Bitmap bitmap;
@@ -118,20 +125,27 @@ public class ResourceHandler implements HttpServer.Handler {
     }
 
     @Override
-    public void handle(HttpServer.Request request, HttpServer.Response response, OutputStream responseStream) throws IOException {
+    public void handle(HttpServer.Request request, HttpServer.Response response) throws IOException {
         if (bitmap == null || !request.getPath().endsWith(uri)) return;
 
         try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
             byte[] imageData = byteArrayOutputStream.toByteArray();
-            response.addHeader("Content-Type", "image/jpeg");
-            response.addHeader("Content-Length", String.valueOf(imageData.length));
+            response.addHeader(HttpServer.Response.CONTENT_TYPE, "image/jpeg");
+            response.addHeader(HttpServer.Response.CONTENT_LENGTH, String.valueOf(imageData.length));
             response.send();
-            responseStream.write(imageData);
+            response.getOutputStream().write(imageData);
         }
     }
 }
 ```
+
+How handlers work:
+
+- Handlers are tried in registration order. The first one calling `response.send()` ends the chain; if none does, a `404 Not Found` is returned.
+- Call `response.setStatus(...)` and `response.addHeader(...)` first, then `response.send()` (once), then write the body to `response.getOutputStream()`.
+- If a handler throws a `RuntimeException` before sending, a `500 Internal Server Error` is returned.
+- Header lookup on the request is case-insensitive: `request.getHeader("range")`.
 
 ### Starting the Server with `ResourceHandler`
 
@@ -147,6 +161,13 @@ httpServer.startServer();
 ### Complete Example
 
 A more complete example of using **CandidHttpServer** in a real-world application can be found in the project **[RadioUpnp](https://github.com/watea/RadioUpnp)**. This project demonstrates how to integrate and extend the library.
+
+## Limitations (by design)
+
+- **The request body is not available to handlers.** Only the request line and headers are parsed. The server is meant for serving content (GET/HEAD-like requests), not for receiving uploads (POST/PUT bodies).
+- **One request per connection.** Every response carries `Connection: close` (unless the handler sets its own `Connection` header) and the socket is closed after the handler returns. Keep-alive is not supported.
+- Request lines and header lines are limited to 8 KB, and requests to 100 headers; larger requests get `400 Bad Request`.
+- Each connection uses one thread from an unbounded pool for its whole duration (streaming responses included).
 
 ## Discussion
 
